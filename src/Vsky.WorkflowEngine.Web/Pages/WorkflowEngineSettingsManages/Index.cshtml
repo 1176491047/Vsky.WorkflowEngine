@@ -1,0 +1,78 @@
+@page
+@using Microsoft.AspNetCore.Authorization
+@using Volo.Abp.AspNetCore.Mvc.UI.Layout
+@using Vsky.WorkflowEngine.Permissions
+@using Vsky.WorkflowEngine.Web.Pages.WorkflowEngineSettingsManages
+@using Vsky.WorkflowEngine.Web.Menus
+@using Microsoft.AspNetCore.Mvc.Localization
+@using Vsky.WorkflowEngine.Localization
+@inject IHtmlLocalizer<WorkflowEngineResource> L
+@inject IAuthorizationService Authorization
+@model IndexModel
+@inject IPageLayout PageLayout
+@{
+    PageLayout.Content.Title = L["WorkflowEngineSettingsManages"].Value;
+    PageLayout.Content.MenuItemName = WorkflowEngineMenus.WorkflowEngineSettingsManages;
+}
+
+@section scripts
+{
+    <abp-script src="/Pages/WorkflowEngineSettingsManages/index.js" />
+}
+
+@section content_toolbar {
+    <abp-button id="ExportToExcelButton" text="@L["ExportToExcel"].Value" icon="download" size="Small" button-type="Primary" />
+    @if (await Authorization.IsGrantedAsync(WorkflowEnginePermissions.WorkflowEngineSettingsManages.Create))
+    {
+        <abp-button id="NewWorkflowEngineSettingsManageButton" text="@L["NewWorkflowEngineSettingsManage"].Value" icon="plus" size="Small" button-type="Primary" />
+    }
+}
+
+<abp-card>
+    <abp-card-body>
+		<abp-row class="mb-3">
+            <abp-column size-md="_12">
+                <form id="SearchForm" autocomplete="off">
+                    <div class="input-group">
+                        <input class="form-control page-search-filter-text" id="FilterText" placeholder="@L["Search"]"/>
+                        <abp-button button-type="Primary" type="submit" icon="search"/>
+                    </div>
+                </form>
+            </abp-column>
+            <abp-column size-md="_12" class="mt-3">
+                <a href="javascript:;" id="AdvancedFilterSectionToggler" class="text-decoration-none">@L["SeeAdvancedFilters"]</a>
+            </abp-column>
+        </abp-row>
+
+        <abp-row id="AdvancedFilterSection" style="display: none;">
+            <abp-column size="_3">
+                <abp-input asp-for="ProjectNameFilter" label="@L["ProjectName"].Value" />
+            </abp-column>
+            <abp-column size="_3">
+                <abp-input asp-for="DescriptionFilter" label="@L["Description"].Value" />
+            </abp-column>
+            <abp-column size="_3">
+                <abp-input asp-for="HistorySaveDaysFilterMin" label="@L["MinHistorySaveDays"].Value" />
+            </abp-column>
+            <abp-column size="_3">
+                <abp-input asp-for="HistorySaveDaysFilterMax" label="@L["MaxHistorySaveDays"].Value" />
+            </abp-column>
+            <abp-column size="_3">
+                <abp-input asp-for="DBInfoDescriptionFilter" label="@L["DBInfoDescription"].Value" />
+            </abp-column>
+        </abp-row>
+
+        <abp-table striped-rows="true" id="WorkflowEngineSettingsManagesTable">
+            <thead>
+				<tr>
+					<th>@L["Actions"]</th>
+					<th>@L["ProjectName"]</th>
+					<th>@L["Description"]</th>
+					<th>@L["HistorySaveDays"]</th>
+					<th>@L["DBInfoDescription"]</th>
+
+				</tr>
+            </thead>
+        </abp-table>
+    </abp-card-body>
+</abp-card>

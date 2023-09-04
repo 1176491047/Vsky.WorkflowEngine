@@ -1,0 +1,80 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <Import Project="..\..\common.props" />
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <RootNamespace>Vsky.WorkflowEngine.Web</RootNamespace>
+    <AssetTargetFallback>$(AssetTargetFallback);portable-net45+win8+wp8+wpa81;</AssetTargetFallback>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
+    <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
+    <MvcRazorExcludeRefAssembliesFromPublish>false</MvcRazorExcludeRefAssembliesFromPublish>
+    <PreserveCompilationReferences>true</PreserveCompilationReferences>
+    <UserSecretsId>Vsky.WorkflowEngine-4681b4fd-151f-4221-84a4-929d86723e4c</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Logs\**" />
+    <Content Remove="Logs\**" />
+    <EmbeddedResource Remove="Logs\**" />
+    <None Remove="Logs\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Pages\WorkflowEngineSettingsManages\CreateModal.cshtml" />
+    <None Include="Pages\WorkflowEngineSettingsManages\EditModal.cshtml" />
+    <None Include="Pages\WorkflowEngineSettingsManages\Index.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Pages\**\*.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Pages\**\*.css">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Elsa" Version="2.12.0" />
+    <PackageReference Include="Elsa.Activities.Console" Version="2.12.0" />
+    <PackageReference Include="Elsa.Activities.ControlFlow" Version="1.5.5.1943" />
+    <PackageReference Include="Elsa.Activities.Email" Version="2.12.0" />
+    <PackageReference Include="Elsa.Activities.Entity" Version="2.12.0" />
+    <PackageReference Include="Elsa.Activities.File" Version="2.12.0" />
+    <PackageReference Include="Elsa.Activities.Http" Version="2.12.0" />
+    <PackageReference Include="Elsa.Activities.Kafka" Version="2.12.0" />
+    <PackageReference Include="Elsa.Activities.RabbitMq" Version="2.12.0" />
+    <PackageReference Include="Elsa.Activities.Temporal.Common" Version="2.12.0" />
+    <PackageReference Include="Elsa.Activities.Temporal.Quartz" Version="2.12.0" />
+    <PackageReference Include="Elsa.Activities.Timers" Version="1.5.5.1943" />
+    <PackageReference Include="Elsa.Activities.UserTask" Version="2.12.0" />
+    <PackageReference Include="Elsa.Designer.Components.Web" Version="2.12.0" />
+    <PackageReference Include="Elsa.Persistence.EntityFramework.MySql" Version="2.12.0" />
+    <PackageReference Include="Elsa.Persistence.EntityFramework.Oracle" Version="2.12.0" />
+    <PackageReference Include="Elsa.Persistence.EntityFramework.PostgreSql" Version="2.12.0" />
+    <PackageReference Include="Elsa.Persistence.EntityFramework.SqlServer" Version="2.12.0" />
+    <PackageReference Include="Elsa.Server.Api" Version="2.12.0" />
+    <PackageReference Include="Serilog.AspNetCore" Version="5.0.0" />
+    <PackageReference Include="Serilog.Sinks.Async" Version="1.5.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Volo.Abp.AspNetCore.Mvc.UI.Theme.LeptonXLite" Version="2.3.*-*" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Vsky.WorkflowEngine.Application\Vsky.WorkflowEngine.Application.csproj" />
+    <ProjectReference Include="..\Vsky.WorkflowEngine.HttpApi\Vsky.WorkflowEngine.HttpApi.csproj" />
+    <ProjectReference Include="..\Vsky.WorkflowEngine.EntityFrameworkCore\Vsky.WorkflowEngine.EntityFrameworkCore.csproj" />
+    <PackageReference Include="Volo.Abp.Autofac" Version="7.3.1" />
+    <PackageReference Include="Volo.Abp.Swashbuckle" Version="7.3.1" />
+    <PackageReference Include="Volo.Abp.AspNetCore.Serilog" Version="7.3.1" />
+    <PackageReference Include="Volo.Abp.Identity.Web" Version="7.3.1" />
+    <PackageReference Include="Volo.Abp.Account.Web.OpenIddict" Version="7.3.1" />
+    <PackageReference Include="Volo.Abp.TenantManagement.Web" Version="7.3.1" />
+    <PackageReference Include="Volo.Abp.SettingManagement.Web" Version="7.3.1" />
+  </ItemGroup>
+
+</Project>

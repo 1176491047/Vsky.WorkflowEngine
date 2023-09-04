@@ -1,0 +1,36 @@
+@page
+@using Microsoft.AspNetCore.Mvc.Localization
+@using Vsky.WorkflowEngine.Localization
+@using Vsky.WorkflowEngine.Web.Pages.WorkflowEngineSettingsManages
+@using Volo.Abp.AspNetCore.Mvc.UI.Bootstrap.TagHelpers.Modal
+@using Vsky.WorkflowEngine.WorkflowEngineSettingsManages;
+@using System.Globalization
+@inject IHtmlLocalizer<WorkflowEngineResource> L
+@model EditModalModel
+@{
+    Layout = null;
+}
+
+<form data-ajaxForm="true" asp-page="/WorkflowEngineSettingsManages/EditModal" autocomplete="off">
+    <abp-modal id="WorkflowEngineSettingsManageEditModal">
+        <abp-modal-header title="@L["Update"].Value"></abp-modal-header>
+
+        <abp-modal-body>
+                    <abp-input asp-for="Id" />
+                    <abp-input asp-for="WorkflowEngineSettingsManage.ConcurrencyStamp" hidden="true" suppress-label="true"/>
+                    
+            <abp-input asp-for="WorkflowEngineSettingsManage.ProjectName"  />
+
+            <abp-input asp-for="WorkflowEngineSettingsManage.Description"  />
+
+            <abp-input asp-for="WorkflowEngineSettingsManage.HistorySaveDays"  />
+
+            <abp-input asp-for="WorkflowEngineSettingsManage.DBInfoDescription" text-area />
+
+                    
+                
+        </abp-modal-body>
+
+        <abp-modal-footer buttons="@(AbpModalButtons.Cancel|AbpModalButtons.Save)"></abp-modal-footer>
+    </abp-modal>
+</form>
