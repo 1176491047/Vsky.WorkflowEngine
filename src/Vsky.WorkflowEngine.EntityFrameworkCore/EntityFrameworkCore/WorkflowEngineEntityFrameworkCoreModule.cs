@@ -19,6 +19,7 @@ using Microsoft.Extensions.Configuration;
 using System.IO;
 using Vsky.WorkflowEngine.Enum;
 using Vsky.WorkflowEngine.WorkflowEngineSettingsManages;
+using Vsky.WorkflowEngine.RoleUserInfos;
 
 namespace Vsky.WorkflowEngine.EntityFrameworkCore;
 
@@ -50,7 +51,7 @@ public class WorkflowEngineEntityFrameworkCoreModule : AbpModule
                 /* Remove "includeAllEntities: true" to create
                  * default repositories only for aggregate roots */
             options.AddDefaultRepositories(includeAllEntities: true);
-            options.AddRepository<WorkflowEngineSettingsManage, WorkflowEngineSettingsManages.EfCoreWorkflowEngineSettingsManageRepository>();
+            options.AddRepository<WorkflowEngineSettingsManage, WorkflowEngineSettingsManages.EfCoreWorkflowEngineSettingsManageRepository>(); 
         });
 
         var configuration = context.Services.GetConfiguration();

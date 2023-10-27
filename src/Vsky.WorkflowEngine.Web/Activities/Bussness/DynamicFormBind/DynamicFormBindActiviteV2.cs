@@ -49,25 +49,40 @@ namespace Vsky.WorkflowEngine.Web.Activities.Bussness.DynamicFormBind
     [Action(
         Category = "业务组件",
         DisplayName = "审批节点",
-        Description = "绑定第三方动态表单和角色",
-        Outcomes = new[] { OutcomeNames.Done,"通过","驳回" }
+        Description = "定义好流程后供动态表单绑定",
+        Outcomes = new[] { OutcomeNames.Done,"通过", "一类驳回", "二类驳回" }
     )]
-    public class DynamicFormBindActivite : Activity
+    public class DynamicFormBindActiviteV2 : Activity
     {
         private readonly Random _random;
         private HttpClient _httpClient;
         private IConfiguration _configuration;
-        public DynamicFormBindActivite(HttpClient httpClient, IConfiguration configuration)
+        public DynamicFormBindActiviteV2(HttpClient httpClient, IConfiguration configuration)
         {
             _random = new Random();
             _httpClient = httpClient;
             _configuration = configuration;
         }
 
+        [ActivityInput(
+                Category = "基础配置",
+                Label = "选择责任部门",
+            UIHint = ActivityInputUIHints.Dropdown,
+            OptionsProvider = typeof(GetABPRoles),
+            DefaultSyntax = SyntaxNames.Literal,
+            SupportedSyntaxes = new[] { SyntaxNames.Literal, SyntaxNames.Json, SyntaxNames.JavaScript, SyntaxNames.Liquid }
+        )]
+        public string? Department { get; set; }
 
+        [ActivityInput(
+                Category = "基础配置",
+                Label = "输入审批人",
+            UIHint = ActivityInputUIHints.MultiText,
+            DefaultSyntax = SyntaxNames.Json,
+            SupportedSyntaxes = new[] { SyntaxNames.Json, SyntaxNames.JavaScript })]
+        public ICollection<string> Persons { get; set; } = new List<string>();
 
-
-
+        #region 请求配置
         /// <summary>
         /// The HTTP method to use.
         /// </summary>
@@ -78,7 +93,7 @@ namespace Vsky.WorkflowEngine.Web.Activities.Bussness.DynamicFormBind
             Options = new[] { "GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS", "HEAD" },
             SupportedSyntaxes = new[] { SyntaxNames.JavaScript, SyntaxNames.Liquid }
         )]
-        public string? Method { get; set; }
+        public string? Method { get; set; } = "POST";
 
         [ActivityInput(
                 Category = "请求配置",
@@ -97,64 +112,17 @@ namespace Vsky.WorkflowEngine.Web.Activities.Bussness.DynamicFormBind
          )]
         public HttpRequestHeaders RequestHeaders { get; set; } = new();
 
-            [ActivityInput(
-                    Category = "请求配置",
-             UIHint = ActivityInputUIHints.Dropdown,
-             Hint = "请求的内容类型",
-             Options = new[] { "", "text/plain", "text/html", "application/json", "application/xml", "application/x-www-form-urlencoded" },
-             SupportedSyntaxes = new[] { SyntaxNames.JavaScript, SyntaxNames.Liquid }
-         )]
-        public string? ContentType { get; set; }
-
-        /// <summary>
-        /// 表单模板编码
-        /// </summary>
         [ActivityInput(
-                Category = "基础配置",
-                Label = "选择表单",
-                Hint = "请选择节点对应的表单",
-              UIHint = ActivityInputUIHints.Dropdown,
-              OptionsProvider = typeof(GetDynamicFormData)
-          )]
-        public string? FormTemplate { get; set; }
+                Category = "请求配置",
+         UIHint = ActivityInputUIHints.Dropdown,
+         Hint = "请求的内容类型",
+         Options = new[] { "", "text/plain", "text/html", "application/json", "application/xml", "application/x-www-form-urlencoded" },
+         SupportedSyntaxes = new[] { SyntaxNames.JavaScript, SyntaxNames.Liquid }
+     )]
+        public string? ContentType { get; set; } = "application/json";
 
+        #endregion
 
-        [ActivityInput(
-                Category = "基础配置",
-                Label = "选择责任部门",
-            UIHint = ActivityInputUIHints.Dropdown,
-            OptionsProvider = typeof(GetABPRoles),
-            DefaultSyntax = SyntaxNames.Literal,
-            SupportedSyntaxes = new[] { SyntaxNames.Literal, SyntaxNames.Json, SyntaxNames.JavaScript, SyntaxNames.Liquid }
-        )]
-        public string? Department { get; set; }
-
-        [ActivityInput(
-                Label = "选择责任人",
-            UIHint = ActivityInputUIHints.CheckList,
-            //Options = new[] {"1","2","3" },
-            OptionsProvider = typeof(GetABPUsers),
-            //DefaultValueProvider =typeof(PersonDefaultMethodsProvider),
-            DefaultSyntax = SyntaxNames.Literal,
-            SupportedSyntaxes = new[] { SyntaxNames.Literal, SyntaxNames.Json, SyntaxNames.JavaScript, SyntaxNames.Liquid }
-        )]
-        public HashSet<string> Persons
-        {
-            get => GetState<HashSet<string>>(() => new HashSet<string>());
-            set => SetState(value);
-        }
-
-        [ActivityInput(
-                Label = "输入审批人",
-            UIHint = ActivityInputUIHints.MultiText,
-            DefaultSyntax = SyntaxNames.Literal,
-            SupportedSyntaxes = new[] { SyntaxNames.Literal, SyntaxNames.Json, SyntaxNames.JavaScript, SyntaxNames.Liquid }
-        )]
-        public IList<string> Persons2
-        {
-            get => GetState<IList<string>>(() => new List<string>());
-            set => SetState(value);
-        }
 
         /// <summary>
         /// 触发时拼接参数 推送给第三方系统 等待回调
@@ -163,38 +131,52 @@ namespace Vsky.WorkflowEngine.Web.Activities.Bussness.DynamicFormBind
         /// <returns></returns>
         protected override async ValueTask<IActivityExecutionResult> OnExecuteAsync(ActivityExecutionContext context)
         {
+            string formId = context.GetVariable("FormId")?.ToString();
+            if (string.IsNullOrEmpty(formId))
+            {
+                var sourceActivity = context.WorkflowExecutionContext.WorkflowBlueprint.Connections.Where(x => x.Target.Activity.Id == context.ActivityId).FirstOrDefault().Source.Activity;
+                //端点类型触发 第三方调用
+                if (sourceActivity.Type == "HttpEndpoint")
+                {
+                    res resust = new res();
+                    HttpRequestModel requestModel = (HttpRequestModel)context.Input;
+                    formId = requestModel.QueryString["FormInstanceId"].ToString();
+                    if (string.IsNullOrEmpty(formId))
+                    {
+                        return Fault("未查询到模板实例ID 检查流程启动入参");
+                    }
+
+                    context.SetVariable("FormId", formId);
+                }
+            }
             //读取业务服务接口地址
             string serviceUrl = _configuration["DynamicFormServiceMessagePushURL"];
             DynamicFormServiceInput dynamicFormServiceInput = new DynamicFormServiceInput()
             {
-                //CurrentNodeId = context.ActivityId,
-                //Department = Department,
-                //Users = Persons.ToList(),
-                //TempCode = FormTemplate,
-                //WorkflowDefinitionId = context.WorkflowInstance.DefinitionId,
-                //WorkflowInstanseId = context.WorkflowInstance.Id
+                CurrentNodeId = Guid.Parse(context.ActivityId),
+                Department = Guid.Parse(Department),
+                Users = Persons.ToList(),
+                WorkflowDefinitionId = Guid.Parse(context.WorkflowInstance.DefinitionId),
+                WorkflowInstanseId=Guid.Parse(context.WorkflowInstance.Id),
+                CurrentNodeName = DisplayName,
+                FormInstanceId = Guid.Parse(formId)
             };
             //发送给业务服务后阻塞流程等待回调
             var request = CreateRequest(serviceUrl, dynamicFormServiceInput);
-            var response = await _httpClient.SendAsync(request);
-            //context.SetVariable(context.ActivityId, response);
-
-            context.SetVariable($"{Guid.NewGuid()}",$"{context.ActivityBlueprint.Name}节点由{Persons.JoinAsString("、")}-{Persons2.JoinAsString("、")},触发");
+            await _httpClient.SendAsync(request);
+            context.SetVariable($"{Guid.NewGuid()}",$"{context.ActivityBlueprint.Name}节点由{Persons.JoinAsString("、")},触发");
             return Suspend();
         }
 
         protected override IActivityExecutionResult OnResume(ActivityExecutionContext context)
         {
             context.SetVariable($"{Guid.NewGuid()}", $"{context.ActivityBlueprint.Name},给出结果{context.Input.ToString()}");
-            if (context.Input.ToString()=="通过")
+            if (string.IsNullOrEmpty(context.Input.ToString()))
             {
-                return Outcome("通过");
+                return Done();
             }
-            if (context.Input.ToString() == "驳回")
-            {
-                return Outcome("驳回");
-            }
-            return Done();
+
+            return Outcome(context.Input.ToString());
         }
 
         private HttpRequestMessage CreateRequest(string url,object? content)

@@ -13,6 +13,7 @@ using Volo.Abp.PermissionManagement.EntityFrameworkCore;
 using Volo.Abp.SettingManagement.EntityFrameworkCore;
 using Volo.Abp.TenantManagement;
 using Volo.Abp.TenantManagement.EntityFrameworkCore;
+using Vsky.WorkflowEngine.RoleUserInfos;
 using Vsky.WorkflowEngine.WorkflowEngineSettingsManages;
 
 namespace Vsky.WorkflowEngine.EntityFrameworkCore;
@@ -43,11 +44,13 @@ public class WorkflowEngineDbContext :
     //Identity
     public DbSet<IdentityUser> Users { get; set; }
     public DbSet<IdentityRole> Roles { get; set; }
+    
     public DbSet<IdentityClaimType> ClaimTypes { get; set; }
     public DbSet<OrganizationUnit> OrganizationUnits { get; set; }
     public DbSet<IdentitySecurityLog> SecurityLogs { get; set; }
     public DbSet<IdentityLinkUser> LinkUsers { get; set; }
     public DbSet<IdentityUserDelegation> UserDelegations { get; set; }
+
 
     // Tenant Management
     public DbSet<Tenant> Tenants { get; set; }
@@ -99,7 +102,6 @@ public class WorkflowEngineDbContext :
                 b.Property(x => x.HistorySaveDays).HasColumnName(nameof(WorkflowEngineSettingsManage.HistorySaveDays)).IsRequired().HasMaxLength(WorkflowEngineSettingsManageConsts.HistorySaveDaysMaxLength);
                 b.Property(x => x.DBInfoDescription).HasColumnName(nameof(WorkflowEngineSettingsManage.DBInfoDescription));
             });
-
         }
     }
 }

@@ -55,6 +55,7 @@ using System;
 using System.Configuration;
 using System.Data;
 using Vsky.WorkflowEngine.Enum;
+using Vsky.WorkflowEngine.Web.Activities.Other;
 
 namespace Vsky.WorkflowEngine.Web;
 
@@ -77,6 +78,12 @@ public class WorkflowEngineWebModule : AbpModule
     {
         context.Services.PreConfigure<AbpMvcDataAnnotationsLocalizationOptions>(options =>
         {
+            Configure<AbpAntiForgeryOptions>(options => {
+                options.AutoValidateIgnoredHttpMethods.Add("POST");
+                options.AutoValidateIgnoredHttpMethods.Add("PUT");
+                options.AutoValidateIgnoredHttpMethods.Add("DELETE");
+
+            });
             options.AddAssemblyResource(
                 typeof(WorkflowEngineResource),
                 typeof(WorkflowEngineDomainModule).Assembly,
@@ -171,6 +178,7 @@ public class WorkflowEngineWebModule : AbpModule
                     .AddActivitiesFrom<SendMailWithSMTPConfig>()
                     .AddActivitiesFrom<WeiChatActivity>()
                     .AddActivitiesFrom<WeiChatActivityWithContentType>()
+                    .AddActivitiesFrom<SendHttpRequestTest>()
                 .AddWorkflow<HelloWorldConsole>()
                 .AddWorkflow<HelloWorldHttp>(); ;
         });

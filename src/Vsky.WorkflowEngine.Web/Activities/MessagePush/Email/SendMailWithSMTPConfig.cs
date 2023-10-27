@@ -28,14 +28,12 @@ namespace Vsky.WorkflowEngine.Web.Activities
 {
     public class SendMailWithSMTPConfig : Activity
     {
-        private readonly ISmtpService _smtpService;
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly IContentSerializer _contentSerializer;
         private readonly SmtpOptions _options;
 
-        public SendMailWithSMTPConfig(ISmtpService smtpService, IOptions<SmtpOptions> options, IHttpClientFactory httpClientFactory, IContentSerializer contentSerializer)
+        public SendMailWithSMTPConfig(IOptions<SmtpOptions> options, IHttpClientFactory httpClientFactory, IContentSerializer contentSerializer)
         {
-            _smtpService = smtpService;
             _httpClientFactory = httpClientFactory;
             _contentSerializer = contentSerializer;
             _options = options.Value;
